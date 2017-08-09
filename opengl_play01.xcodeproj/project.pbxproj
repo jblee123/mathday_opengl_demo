@@ -8,6 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		38F314241F39570800A5FF81 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 38F314231F39570800A5FF81 /* main.cpp */; };
+		38F3142B1F395AD300A5FF81 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 38F3142A1F395AD300A5FF81 /* OpenGL.framework */; };
+		38F3142D1F395BE800A5FF81 /* libGLEW.2.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 38F3142C1F395BE800A5FF81 /* libGLEW.2.1.0.dylib */; };
+		38F3142F1F395C2000A5FF81 /* libglfw.3.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 38F3142E1F395C2000A5FF81 /* libglfw.3.2.dylib */; };
+		38F314321F3BDB5E00A5FF81 /* gl_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 38F314301F3BDB5E00A5FF81 /* gl_utils.cpp */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +29,11 @@
 /* Begin PBXFileReference section */
 		38F314201F39570800A5FF81 /* opengl_play01 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = opengl_play01; sourceTree = BUILT_PRODUCTS_DIR; };
 		38F314231F39570800A5FF81 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		38F3142A1F395AD300A5FF81 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
+		38F3142C1F395BE800A5FF81 /* libGLEW.2.1.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libGLEW.2.1.0.dylib; path = ../../../../usr/local/Cellar/glew/2.1.0/lib/libGLEW.2.1.0.dylib; sourceTree = "<group>"; };
+		38F3142E1F395C2000A5FF81 /* libglfw.3.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libglfw.3.2.dylib; path = ../../../../usr/local/Cellar/glfw/3.2.1/lib/libglfw.3.2.dylib; sourceTree = "<group>"; };
+		38F314301F3BDB5E00A5FF81 /* gl_utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = gl_utils.cpp; sourceTree = "<group>"; };
+		38F314331F3BDBC900A5FF81 /* gl_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gl_utils.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,6 +41,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				38F3142F1F395C2000A5FF81 /* libglfw.3.2.dylib in Frameworks */,
+				38F3142D1F395BE800A5FF81 /* libGLEW.2.1.0.dylib in Frameworks */,
+				38F3142B1F395AD300A5FF81 /* OpenGL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -41,6 +53,9 @@
 		38F314171F39570800A5FF81 = {
 			isa = PBXGroup;
 			children = (
+				38F3142E1F395C2000A5FF81 /* libglfw.3.2.dylib */,
+				38F3142C1F395BE800A5FF81 /* libGLEW.2.1.0.dylib */,
+				38F3142A1F395AD300A5FF81 /* OpenGL.framework */,
 				38F314221F39570800A5FF81 /* opengl_play01 */,
 				38F314211F39570800A5FF81 /* Products */,
 			);
@@ -57,7 +72,9 @@
 		38F314221F39570800A5FF81 /* opengl_play01 */ = {
 			isa = PBXGroup;
 			children = (
+				38F314331F3BDBC900A5FF81 /* gl_utils.h */,
 				38F314231F39570800A5FF81 /* main.cpp */,
+				38F314301F3BDB5E00A5FF81 /* gl_utils.cpp */,
 			);
 			path = opengl_play01;
 			sourceTree = "<group>";
@@ -119,6 +136,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				38F314241F39570800A5FF81 /* main.cpp in Sources */,
+				38F314321F3BDB5E00A5FF81 /* gl_utils.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -205,6 +223,11 @@
 		38F314281F39570800A5FF81 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				HEADER_SEARCH_PATHS = /usr/local/include;
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/Cellar/glew/2.1.0/lib,
+					/usr/local/Cellar/glfw/3.2.1/lib,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -212,6 +235,11 @@
 		38F314291F39570800A5FF81 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				HEADER_SEARCH_PATHS = /usr/local/include;
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/Cellar/glew/2.1.0/lib,
+					/usr/local/Cellar/glfw/3.2.1/lib,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
