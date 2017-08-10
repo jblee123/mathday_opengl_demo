@@ -27,7 +27,7 @@ void draw() {
     glUseProgram(s_prog1);
 
     glBindVertexArray(s_vao);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 int main(int argc, const char* argv[]) {
