@@ -15,19 +15,27 @@ const GLint HEIGHT = 600;
 
 static GLuint s_vao;
 static GLuint s_prog1;
+static GLint s_angle_rads_loc;
 
 static void error_callback(int error, const char* description) {
     std::cout << description << std::endl;
 }
 
 void draw() {
+    static uint32_t frame_num = 0;
+
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     glUseProgram(s_prog1);
 
+    float angle = (2 * PI_F) * ((frame_num % 120) / 120.f);
+    glUniform1f(s_angle_rads_loc, angle);
+
     glBindVertexArray(s_vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    frame_num++;
 }
 
 int main(int argc, const char* argv[]) {
@@ -41,7 +49,7 @@ int main(int argc, const char* argv[]) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+    glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
     glfwSetErrorCallback(error_callback);
 
@@ -72,6 +80,12 @@ int main(int argc, const char* argv[]) {
         "../../../shaders/frag_shader_1.frag");
     if (s_prog1 == 0) {
         std::cout << "Failed to create the shader program" << std::endl;
+        return -1;
+    }
+
+    s_angle_rads_loc = glGetUniformLocation(s_prog1, "angle_rads");
+    if (s_angle_rads_loc == -1) {
+        std::cout << "couldn't get the uniform for angle_rads" << std::endl;
         return -1;
     }
 
