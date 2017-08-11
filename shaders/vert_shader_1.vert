@@ -9,10 +9,10 @@ void main(void)
     const vec2 vertices[] = vec2[](
         vec2( 0.25, -0.25),
         vec2(-0.25, -0.25),
-        vec2( 0.25,  0.25),
+        vec2( 0.5,  0.25),
 
         vec2(-0.25, -0.25),
-        vec2( 0.25,  0.25),
+        vec2( 0.25,  0.5),
         vec2(-0.25,  0.25));
 
     const vec2 fs_tex_uvs[] = vec2[](
