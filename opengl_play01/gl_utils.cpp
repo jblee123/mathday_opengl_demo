@@ -43,7 +43,14 @@ bool check_gl_err() {
     return true;
 }
 
-static void print_shader_log(GLuint shader) {
+void check_gl_err_or_die(const char* msg) {
+    if (check_gl_err()) {
+        std::cout << msg << std::endl;
+        exit(-1);
+    }
+}
+
+static void print_shader_log(GLuint shader, const char* filename) {
     GLint max_log_length;
     glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &max_log_length);
     char* log = new char[max_log_length];
@@ -51,7 +58,7 @@ static void print_shader_log(GLuint shader) {
     GLint log_len;
     glGetShaderInfoLog(shader, max_log_length, &log_len, log);
 
-    std::cout << "Shader log file:" << std::endl;
+    std::cout << "Shader " << filename << " log file:" << std::endl;
     if (*log) {
         std::cout << log << std::endl;
     }
@@ -111,45 +118,45 @@ GLuint make_prog(const char* vert_shader_file, const char* frag_shader_file) {
     GLuint vs = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vs, 1, &vert_shader_src_cstr, NULL);
     if (check_gl_err()) {
-        print_shader_log(vs);
+        print_shader_log(vs, vert_shader_file);
         return 0;
     }
     glCompileShader(vs);
     if (check_gl_err()) {
-        print_shader_log(vs);
+        print_shader_log(vs, vert_shader_file);
         return 0;
     }
     glGetShaderiv(vs, GL_COMPILE_STATUS, &compile_status);
     if (compile_status == GL_FALSE) {
-        print_shader_log(vs);
+        print_shader_log(vs, vert_shader_file);
         return 0;
     }
 
     GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fs, 1, &frag_shader_src_cstr, NULL);
     if (check_gl_err()) {
-        print_shader_log(fs);
+        print_shader_log(fs, frag_shader_file);
         return 0;
     }
     glCompileShader(fs);
     if (check_gl_err()) {
-        print_shader_log(fs);
+        print_shader_log(fs, frag_shader_file);
         return 0;
     }
     glGetShaderiv(fs, GL_COMPILE_STATUS, &compile_status);
     if (compile_status == GL_FALSE) {
-        print_shader_log(fs);
+        print_shader_log(fs, frag_shader_file);
         return 0;
     }
 
     glAttachShader(prog, vs);
     if (check_gl_err()) {
-        print_shader_log(vs);
+        print_shader_log(vs, vert_shader_file);
         return 0;
     }
     glAttachShader(prog, fs);
     if (check_gl_err()) {
-        print_shader_log(fs);
+        print_shader_log(fs, frag_shader_file);
         return 0;
     }
 

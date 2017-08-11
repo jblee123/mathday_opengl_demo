@@ -8,7 +8,9 @@
 #include <GLFW/glfw3.h>
 
 #include <unistd.h>
+
 #include "gl_utils.h"
+#include "stb_image.h"
 
 const GLint WIDTH = 800;
 const GLint HEIGHT = 600;
@@ -16,9 +18,38 @@ const GLint HEIGHT = 600;
 static GLuint s_vao;
 static GLuint s_prog1;
 static GLint s_angle_rads_loc;
+static GLuint s_smiley_tex;
 
 static void error_callback(int error, const char* description) {
     std::cout << description << std::endl;
+}
+
+void create_smiley_texture() {
+    int width, height, channels;
+    unsigned char* data = stbi_load(
+        "../../../images/smiley_face.png", &width, &height, &channels, 0);
+    if (!data) {
+        std::cout << "couldn't load smiley.png" << std::endl;
+        exit(-1);
+    }
+
+    glGenTextures(1, &s_smiley_tex);
+    check_gl_err_or_die("gen tex s_smiley_tex");
+
+    glBindTexture(GL_TEXTURE_2D, s_smiley_tex);
+    check_gl_err_or_die("binding s_smiley_tex");
+
+    glTexImage2D(
+        GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0,
+        GL_RGBA, GL_UNSIGNED_BYTE, data);
+    check_gl_err_or_die("glTexImage2D smiley tex");
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    stbi_image_free(data);
 }
 
 void draw() {
@@ -29,11 +60,15 @@ void draw() {
 
     glUseProgram(s_prog1);
 
-    float angle = (2 * PI_F) * ((frame_num % 120) / 120.f);
+    float angle = 0;
     glUniform1f(s_angle_rads_loc, angle);
+
+    glBindTexture(GL_TEXTURE_2D, s_smiley_tex);
 
     glBindVertexArray(s_vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     frame_num++;
 }
@@ -53,7 +88,8 @@ int main(int argc, const char* argv[]) {
 
     glfwSetErrorCallback(error_callback);
 
-    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "OpenGL Play 01", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(
+        WIDTH, HEIGHT, "OpenGL Play 01", nullptr, nullptr);
 
     if (!window) {
         glGetError();
@@ -62,7 +98,7 @@ int main(int argc, const char* argv[]) {
 
         return -1;
     }
-    
+
     int screen_width, screen_height;
     glfwGetFramebufferSize(window, &screen_width, &screen_height);
 
@@ -88,6 +124,11 @@ int main(int argc, const char* argv[]) {
         std::cout << "couldn't get the uniform for angle_rads" << std::endl;
         return -1;
     }
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    create_smiley_texture();
 
     glGenVertexArrays(1, &s_vao);
 

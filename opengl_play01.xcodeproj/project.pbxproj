@@ -12,6 +12,7 @@
 		38F3142D1F395BE800A5FF81 /* libGLEW.2.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 38F3142C1F395BE800A5FF81 /* libGLEW.2.1.0.dylib */; };
 		38F3142F1F395C2000A5FF81 /* libglfw.3.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 38F3142E1F395C2000A5FF81 /* libglfw.3.2.dylib */; };
 		38F314321F3BDB5E00A5FF81 /* gl_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 38F314301F3BDB5E00A5FF81 /* gl_utils.cpp */; settings = {ASSET_TAGS = (); }; };
+		38F314351F3D40A100A5FF81 /* stb_image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 38F314341F3D40A100A5FF81 /* stb_image.cpp */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -34,6 +35,7 @@
 		38F3142E1F395C2000A5FF81 /* libglfw.3.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libglfw.3.2.dylib; path = ../../../../usr/local/Cellar/glfw/3.2.1/lib/libglfw.3.2.dylib; sourceTree = "<group>"; };
 		38F314301F3BDB5E00A5FF81 /* gl_utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = gl_utils.cpp; sourceTree = "<group>"; };
 		38F314331F3BDBC900A5FF81 /* gl_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gl_utils.h; sourceTree = "<group>"; };
+		38F314341F3D40A100A5FF81 /* stb_image.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = stb_image.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,6 +74,7 @@
 		38F314221F39570800A5FF81 /* opengl_play01 */ = {
 			isa = PBXGroup;
 			children = (
+				38F314341F3D40A100A5FF81 /* stb_image.cpp */,
 				38F314331F3BDBC900A5FF81 /* gl_utils.h */,
 				38F314231F39570800A5FF81 /* main.cpp */,
 				38F314301F3BDB5E00A5FF81 /* gl_utils.cpp */,
@@ -135,6 +138,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				38F314351F3D40A100A5FF81 /* stb_image.cpp in Sources */,
 				38F314241F39570800A5FF81 /* main.cpp in Sources */,
 				38F314321F3BDB5E00A5FF81 /* gl_utils.cpp in Sources */,
 			);
@@ -263,6 +267,7 @@
 				38F314291F39570800A5FF81 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

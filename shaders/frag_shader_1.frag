@@ -1,10 +1,12 @@
 #version 410 core
 
+uniform sampler2D smiley_sampler;
+
 out vec4 color;
 
-in vec2 fs_param;
+in vec2 fs_tex_uv;
 
 void main(void)
 {
-    color = vec4(fs_param.x, fs_param.y, 1.0, 1.0);
+    color = texture(smiley_sampler, fs_tex_uv);
 }
