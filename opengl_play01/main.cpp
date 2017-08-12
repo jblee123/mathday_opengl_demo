@@ -17,8 +17,13 @@ const GLint HEIGHT = 600;
 
 static GLuint s_vao;
 static GLuint s_prog1;
-static GLint s_angle_rads_loc;
+
+static GLint s_mv_matrix_loc;
+static GLint s_proj_matrix_loc;
+
 static GLuint s_smiley_tex;
+
+static Vec3f s_cam_pos;
 
 static void error_callback(int error, const char* description) {
     std::cout << description << std::endl;
@@ -52,16 +57,39 @@ void create_smiley_texture() {
     stbi_image_free(data);
 }
 
-void draw() {
+void draw(GLFWwindow* window) {
     static uint32_t frame_num = 0;
+    static const float FOV = 90;
+    static const float NEAR = 0.1f;
+    static const float FAR = 1000.0f;
+    static const Vec3f AT = {0, 0, 0};
+    static const Vec3f UP = {0, 1, 0};
+
+    int screen_w, screen_h;
+    glfwGetFramebufferSize(window, &screen_w, &screen_h);
+
+    float aspect_ratio = (float)screen_w / screen_h;
+
+    float bottom, top, left, right;
+    get_perspective_info(
+        FOV, aspect_ratio, NEAR, FAR,
+        bottom, top, left, right);
+
+    Matrix44f mv_matrix;
+    calc_lookat_matrix(s_cam_pos, AT, UP, mv_matrix);
+
+    Matrix44f proj_matrix;
+    calc_proj_matrix(
+        bottom, top, left, right, NEAR, FAR,
+        proj_matrix);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     glUseProgram(s_prog1);
 
-    float angle = 0;
-    glUniform1f(s_angle_rads_loc, angle);
+    glUniformMatrix4fv(s_mv_matrix_loc, 1, false, (float*)mv_matrix);
+    glUniformMatrix4fv(s_proj_matrix_loc, 1, false, (float*)proj_matrix);
 
     glBindTexture(GL_TEXTURE_2D, s_smiley_tex);
 
@@ -77,6 +105,8 @@ int main(int argc, const char* argv[]) {
     char buf[256];
     getcwd(buf, sizeof(buf));
     std::cout << "cwd: " << buf << std::endl;
+
+    s_cam_pos = { 1, 1, 2 };
 
     glfwInit();
 
@@ -119,11 +149,8 @@ int main(int argc, const char* argv[]) {
         return -1;
     }
 
-    s_angle_rads_loc = glGetUniformLocation(s_prog1, "angle_rads");
-    if (s_angle_rads_loc == -1) {
-        std::cout << "couldn't get the uniform for angle_rads" << std::endl;
-        return -1;
-    }
+    s_mv_matrix_loc = get_uniform_loc(s_prog1, "mv_matrix");
+    s_proj_matrix_loc = get_uniform_loc(s_prog1, "proj_matrix");
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -137,7 +164,7 @@ int main(int argc, const char* argv[]) {
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
-        draw();
+        draw(window);
 
         glfwSwapBuffers(window);
     }

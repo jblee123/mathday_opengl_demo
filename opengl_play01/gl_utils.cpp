@@ -1,5 +1,6 @@
 #include "gl_utils.h"
 
+#include <cmath>
 #include <cstdio>
 
 #include <fstream>
@@ -167,4 +168,80 @@ GLuint make_prog(const char* vert_shader_file, const char* frag_shader_file) {
     }
 
     return prog;
+}
+
+GLint get_uniform_loc(GLuint prog, const char* name) {
+    GLint loc = glGetUniformLocation(prog, name);
+    if (loc == -1) {
+        std::cout << "couldn't get the uniform for " << name << std::endl;
+        exit(-1);
+    }
+    return loc;
+}
+
+void get_perspective_info(
+    float fov, float aspect_ratio, float near, float far,
+    float& b, float& t, float& l, float& r)
+{
+    float scale = tan(fov * 0.5 * PI / 180) * near;
+    r = aspect_ratio * scale;
+    l = -r;
+    t = scale;
+    b = -t;
+}
+
+void calc_proj_matrix(
+    float b, float t, float l, float r, float n, float f,
+    Matrix44f& mat)
+{
+    // set OpenGL perspective projection matrix
+    mat[0][0] = 2 * n / (r - l);
+    mat[0][1] = 0;
+    mat[0][2] = 0;
+    mat[0][3] = 0;
+
+    mat[1][0] = 0;
+    mat[1][1] = 2 * n / (t - b);
+    mat[1][2] = 0;
+    mat[1][3] = 0;
+
+    mat[2][0] = (r + l) / (r - l);
+    mat[2][1] = (t + b) / (t - b);
+    mat[2][2] = -(f + n) / (f - n);
+    mat[2][3] = -1;
+
+    mat[3][0] = 0;
+    mat[3][1] = 0;
+    mat[3][2] = -2 * f * n / (f - n);
+    mat[3][3] = 0;
+}
+
+void calc_lookat_matrix(
+    const Vec3f& pos, const Vec3f& at, const Vec3f& up,
+    Matrix44f& mat) {
+
+    Vec3f z_axis = (pos - at).norm();
+
+    Vec3f x_axis = up.cross(z_axis).norm();
+    Vec3f y_axis = z_axis.cross(x_axis);
+
+    mat[0][0] = x_axis.x;
+    mat[1][0] = x_axis.y;
+    mat[2][0] = x_axis.z;
+    mat[3][0] = x_axis.dot(pos) * -1.0f;
+
+    mat[0][1] = y_axis.x;
+    mat[1][1] = y_axis.y;
+    mat[2][1] = y_axis.z;
+    mat[3][1] = y_axis.dot(pos) * -1.0f;
+
+    mat[0][2] = z_axis.x;
+    mat[1][2] = z_axis.y;
+    mat[2][2] = z_axis.z;
+    mat[3][2] = z_axis.dot(pos) * -1.0f;
+
+    mat[0][3] = 0;
+    mat[1][3] = 0;
+    mat[2][3] = 0;
+    mat[3][3] = 1;
 }
