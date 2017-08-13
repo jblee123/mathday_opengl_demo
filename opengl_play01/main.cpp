@@ -16,6 +16,7 @@ const GLint WIDTH = 800;
 const GLint HEIGHT = 600;
 
 static GLuint s_vao;
+static GLuint s_cube_vbo;
 static GLuint s_prog1;
 
 static GLint s_mv_matrix_loc;
@@ -84,7 +85,7 @@ void draw(GLFWwindow* window) {
         proj_matrix);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glUseProgram(s_prog1);
 
@@ -94,7 +95,7 @@ void draw(GLFWwindow* window) {
     glBindTexture(GL_TEXTURE_2D, s_smiley_tex);
 
     glBindVertexArray(s_vao);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -106,7 +107,8 @@ int main(int argc, const char* argv[]) {
     getcwd(buf, sizeof(buf));
     std::cout << "cwd: " << buf << std::endl;
 
-    s_cam_pos = { 1, 1, 2 };
+    s_cam_pos = { 3, 2.5, 5 };
+    s_cam_pos *= 0.6;
 
     glfwInit();
 
@@ -154,10 +156,101 @@ int main(int argc, const char* argv[]) {
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_DEPTH_TEST);
 
     create_smiley_texture();
 
+    const int ATTRIBS_PER_CUBE_VERT = 8;
+
+    const GLfloat cube[][ATTRIBS_PER_CUBE_VERT] = {
+        // front
+        {  1, -1,  1,   1, 1,   0, 0, 1 },
+        { -1, -1,  1,   0, 1,   0, 0, 1 },
+        {  1,  1,  1,   1, 0,   0, 0, 1 },
+        { -1, -1,  1,   0, 1,   0, 0, 1 },
+        {  1,  1,  1,   1, 0,   0, 0, 1 },
+        { -1,  1,  1,   0, 0,   0, 0, 1 },
+
+        // right
+        {  1, -1, -1,   1, 1,   1, 0, 0 },
+        {  1, -1,  1,   0, 1,   1, 0, 0 },
+        {  1,  1, -1,   1, 0,   1, 0, 0 },
+        {  1, -1,  1,   0, 1,   1, 0, 0 },
+        {  1,  1, -1,   1, 0,   1, 0, 0 },
+        {  1,  1,  1,   0, 0,   1, 0, 0 },
+
+        // left
+        { -1, -1,  1,   1, 1,   0, 1, 1 },
+        { -1, -1, -1,   0, 1,   0, 1, 1 },
+        { -1,  1,  1,   1, 0,   0, 1, 1 },
+        { -1, -1, -1,   0, 1,   0, 1, 1 },
+        { -1,  1,  1,   1, 0,   0, 1, 1 },
+        { -1,  1, -1,   0, 0,   0, 1, 1 },
+
+        // back
+        { -1, -1, -1,   1, 1,   1, 1, 1 },
+        {  1, -1, -1,   0, 1,   1, 1, 1 },
+        { -1,  1, -1,   1, 0,   1, 1, 1 },
+        {  1, -1, -1,   0, 1,   1, 1, 1 },
+        { -1,  1, -1,   1, 0,   1, 1, 1 },
+        {  1,  1, -1,   0, 0,   1, 1, 1 },
+
+        // top
+        {  1,  1,  1,   1, 1,   0, 1, 0 },
+        { -1,  1,  1,   0, 1,   0, 1, 0 },
+        {  1,  1, -1,   1, 0,   0, 1, 0 },
+        { -1,  1,  1,   0, 1,   0, 1, 0 },
+        {  1,  1, -1,   1, 0,   0, 1, 0 },
+        { -1,  1, -1,   0, 0,   0, 1, 0 },
+
+        // bottom
+        { -1, -1,  1,   1, 1,   1, 0, 1 },
+        {  1, -1,  1,   0, 1,   1, 0, 1 },
+        { -1, -1, -1,   1, 0,   1, 0, 1 },
+        {  1, -1,  1,   0, 1,   1, 0, 1 },
+        { -1, -1, -1,   1, 0,   1, 0, 1 },
+        {  1, -1, -1,   0, 0,   1, 0, 1 },
+    };
+
+    const GLuint STRIDE = sizeof(cube[0]);
+
     glGenVertexArrays(1, &s_vao);
+    check_gl_err_or_die("glGenVertexArrays");
+
+    glBindVertexArray(s_vao);
+    check_gl_err_or_die("glBindVertexArray");
+
+    glGenBuffers(1, &s_cube_vbo);
+    check_gl_err_or_die("glGenBuffers");
+    glBindBuffer(GL_ARRAY_BUFFER, s_cube_vbo);
+    check_gl_err_or_die("glBindBuffer");
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cube), cube, GL_STATIC_DRAW);
+    check_gl_err_or_die("glBufferData");
+
+    char* offset = 0;
+
+    glVertexAttribPointer(
+        0, 3, GL_FLOAT, GL_FALSE, STRIDE, (void*)offset);
+    check_gl_err_or_die("glVertexAttribPointer");
+    glEnableVertexAttribArray(0);
+    check_gl_err_or_die("glEnableVertexAttribArray(0)");
+
+    offset += 3 * sizeof(GLfloat);
+
+    glVertexAttribPointer(
+        1, 2, GL_FLOAT, GL_FALSE, STRIDE, offset);
+    check_gl_err_or_die("glVertexAttribPointer");
+    glEnableVertexAttribArray(1);
+    check_gl_err_or_die("glEnableVertexAttribArray(1)");
+
+    offset += 2 * sizeof(GLfloat);
+
+    glVertexAttribPointer(
+        2, 3, GL_FLOAT, GL_FALSE, STRIDE, offset);
+    check_gl_err_or_die("glVertexAttribPointer");
+    glEnableVertexAttribArray(2);
+    check_gl_err_or_die("glEnableVertexAttribArray(2)");
+
 
     glViewport(0, 0, screen_width, screen_height);
 

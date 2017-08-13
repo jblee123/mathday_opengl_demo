@@ -1,32 +1,20 @@
 #version 410 core
 
+layout (location = 0) in vec3 in_pos;
+layout (location = 1) in vec2 in_tex_uv;
+layout (location = 2) in vec3 in_color;
+
 uniform mat4 mv_matrix;
 uniform mat4 proj_matrix;
 
 out vec2 fs_tex_uv;
+out vec4 fs_color;
 
 void main(void)
 {
-    const vec2 vertices[] = vec2[](
-        vec2( 1, -1),
-        vec2(-1, -1),
-        vec2( 1,  1),
+    fs_tex_uv = in_tex_uv;
+    fs_color = vec4(in_color, 1);
 
-        vec2(-1, -1),
-        vec2( 1,  1),
-        vec2(-1,  1));
-
-    const vec2 fs_tex_uvs[] = vec2[](
-        vec2(1, 1),
-        vec2(0, 1),
-        vec2(1, 0),
-
-        vec2(0, 1),
-        vec2(1, 0),
-        vec2(0, 0));
-
-    fs_tex_uv = fs_tex_uvs[gl_VertexID];
-
-    gl_Position = vec4(vertices[gl_VertexID], 0, 1);
+    gl_Position = vec4(in_pos, 1);
     gl_Position = proj_matrix * mv_matrix * gl_Position;
 }
