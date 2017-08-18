@@ -179,6 +179,45 @@ GLint get_uniform_loc(GLuint prog, const char* name) {
     return loc;
 }
 
+void get_identity_matrix(Matrix44f& result) {
+    memset(result, 0, sizeof(result));
+    for (int i = 0; i < 4; i++) {
+        result[i][i] = 1;
+    }
+}
+
+void mult_matrices(
+    const Matrix44f& m1, const Matrix44f& m2,
+    Matrix44f& result) {
+
+    Matrix44f tmp_result = {0};
+
+    for (int x = 0; x < 4; x++) {
+        for (int y = 0; y < 4; y++) {
+            for (int i = 0; i < 4; i++) {
+                tmp_result[x][y] += m1[x][i] * m2[i][y];
+            }
+        }
+    }
+
+    memcpy(result, tmp_result, sizeof(result));
+}
+
+void add_y_rotation_to_matrix(Matrix44f& m, float rot) {
+    Matrix44f rot_matrix;
+    get_identity_matrix(rot_matrix);
+
+    float s = sin(rot);
+    float c = cos(rot);
+
+    rot_matrix[0][0] = c;
+    rot_matrix[2][0] = s;
+    rot_matrix[0][2] = -s;
+    rot_matrix[2][2] = c;
+
+    mult_matrices(m, rot_matrix, m);
+}
+
 void get_perspective_info(
     float fov, float aspect_ratio, float near, float far,
     float& b, float& t, float& l, float& r)

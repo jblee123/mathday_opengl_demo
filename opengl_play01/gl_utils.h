@@ -139,6 +139,14 @@ struct Vec3f {
 
 typedef float Matrix44f[4][4];
 
+void get_identity_matrix(Matrix44f& result);
+
+void mult_matrices(
+    const Matrix44f& m1, const Matrix44f& m2,
+    Matrix44f& result);
+
+void add_y_rotation_to_matrix(Matrix44f& m, float rot);
+
 void get_perspective_info(
     float fov, float aspect_ratio, float near, float far,
     float& b, float& t, float& l, float& r);

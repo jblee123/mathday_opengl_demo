@@ -19,7 +19,8 @@ static GLuint s_vao;
 static GLuint s_cube_vbo;
 static GLuint s_prog1;
 
-static GLint s_mv_matrix_loc;
+static GLint s_model_matrix_loc;
+static GLint s_view_matrix_loc;
 static GLint s_proj_matrix_loc;
 
 static GLuint s_smiley_tex;
@@ -71,13 +72,22 @@ void draw(GLFWwindow* window) {
 
     float aspect_ratio = (float)screen_w / screen_h;
 
+    Matrix44f model_matrix;
+    get_identity_matrix(model_matrix);
+
+    static const uint32_t FRAMES_PER_ROT = 60 * 4;
+    float angle = (float)(frame_num % FRAMES_PER_ROT) / FRAMES_PER_ROT;
+    angle *= 2 * PI_F;
+
+    add_y_rotation_to_matrix(model_matrix, angle);
+
     float bottom, top, left, right;
     get_perspective_info(
         FOV, aspect_ratio, NEAR, FAR,
         bottom, top, left, right);
 
-    Matrix44f mv_matrix;
-    calc_lookat_matrix(s_cam_pos, AT, UP, mv_matrix);
+    Matrix44f view_matrix;
+    calc_lookat_matrix(s_cam_pos, AT, UP, view_matrix);
 
     Matrix44f proj_matrix;
     calc_proj_matrix(
@@ -89,7 +99,8 @@ void draw(GLFWwindow* window) {
 
     glUseProgram(s_prog1);
 
-    glUniformMatrix4fv(s_mv_matrix_loc, 1, false, (float*)mv_matrix);
+    glUniformMatrix4fv(s_model_matrix_loc, 1, false, (float*)model_matrix);
+    glUniformMatrix4fv(s_view_matrix_loc, 1, false, (float*)view_matrix);
     glUniformMatrix4fv(s_proj_matrix_loc, 1, false, (float*)proj_matrix);
 
     glBindTexture(GL_TEXTURE_2D, s_smiley_tex);
@@ -107,7 +118,7 @@ int main(int argc, const char* argv[]) {
     getcwd(buf, sizeof(buf));
     std::cout << "cwd: " << buf << std::endl;
 
-    s_cam_pos = { 3, 2.5, 5 };
+    s_cam_pos = { 4, 3, 4 };
     s_cam_pos *= 0.6;
 
     glfwInit();
@@ -151,7 +162,8 @@ int main(int argc, const char* argv[]) {
         return -1;
     }
 
-    s_mv_matrix_loc = get_uniform_loc(s_prog1, "mv_matrix");
+    s_model_matrix_loc = get_uniform_loc(s_prog1, "model_matrix");
+    s_view_matrix_loc = get_uniform_loc(s_prog1, "view_matrix");
     s_proj_matrix_loc = get_uniform_loc(s_prog1, "proj_matrix");
 
     glEnable(GL_BLEND);
@@ -160,56 +172,56 @@ int main(int argc, const char* argv[]) {
 
     create_smiley_texture();
 
-    const int ATTRIBS_PER_CUBE_VERT = 8;
+    const int ATTRIBS_PER_CUBE_VERT = 11;
 
     const GLfloat cube[][ATTRIBS_PER_CUBE_VERT] = {
         // front
-        {  1, -1,  1,   1, 1,   0, 0, 1 },
-        { -1, -1,  1,   0, 1,   0, 0, 1 },
-        {  1,  1,  1,   1, 0,   0, 0, 1 },
-        { -1, -1,  1,   0, 1,   0, 0, 1 },
-        {  1,  1,  1,   1, 0,   0, 0, 1 },
-        { -1,  1,  1,   0, 0,   0, 0, 1 },
+        {  1, -1,  1,   1, 1,   0, 0, 1,   0, 0, 1 },
+        { -1, -1,  1,   0, 1,   0, 0, 1,   0, 0, 1 },
+        {  1,  1,  1,   1, 0,   0, 0, 1,   0, 0, 1 },
+        { -1, -1,  1,   0, 1,   0, 0, 1,   0, 0, 1 },
+        {  1,  1,  1,   1, 0,   0, 0, 1,   0, 0, 1 },
+        { -1,  1,  1,   0, 0,   0, 0, 1,   0, 0, 1 },
 
         // right
-        {  1, -1, -1,   1, 1,   1, 0, 0 },
-        {  1, -1,  1,   0, 1,   1, 0, 0 },
-        {  1,  1, -1,   1, 0,   1, 0, 0 },
-        {  1, -1,  1,   0, 1,   1, 0, 0 },
-        {  1,  1, -1,   1, 0,   1, 0, 0 },
-        {  1,  1,  1,   0, 0,   1, 0, 0 },
+        {  1, -1, -1,   1, 1,   1, 0, 0,   1, 0, 0 },
+        {  1, -1,  1,   0, 1,   1, 0, 0,   1, 0, 0 },
+        {  1,  1, -1,   1, 0,   1, 0, 0,   1, 0, 0 },
+        {  1, -1,  1,   0, 1,   1, 0, 0,   1, 0, 0 },
+        {  1,  1, -1,   1, 0,   1, 0, 0,   1, 0, 0 },
+        {  1,  1,  1,   0, 0,   1, 0, 0,   1, 0, 0 },
 
         // left
-        { -1, -1,  1,   1, 1,   0, 1, 1 },
-        { -1, -1, -1,   0, 1,   0, 1, 1 },
-        { -1,  1,  1,   1, 0,   0, 1, 1 },
-        { -1, -1, -1,   0, 1,   0, 1, 1 },
-        { -1,  1,  1,   1, 0,   0, 1, 1 },
-        { -1,  1, -1,   0, 0,   0, 1, 1 },
+        { -1, -1,  1,   1, 1,   0, 1, 1,   -1, 0, 0 },
+        { -1, -1, -1,   0, 1,   0, 1, 1,   -1, 0, 0 },
+        { -1,  1,  1,   1, 0,   0, 1, 1,   -1, 0, 0 },
+        { -1, -1, -1,   0, 1,   0, 1, 1,   -1, 0, 0 },
+        { -1,  1,  1,   1, 0,   0, 1, 1,   -1, 0, 0 },
+        { -1,  1, -1,   0, 0,   0, 1, 1,   -1, 0, 0 },
 
         // back
-        { -1, -1, -1,   1, 1,   1, 1, 1 },
-        {  1, -1, -1,   0, 1,   1, 1, 1 },
-        { -1,  1, -1,   1, 0,   1, 1, 1 },
-        {  1, -1, -1,   0, 1,   1, 1, 1 },
-        { -1,  1, -1,   1, 0,   1, 1, 1 },
-        {  1,  1, -1,   0, 0,   1, 1, 1 },
+        { -1, -1, -1,   1, 1,   1, 1, 1,   0, 0, -1 },
+        {  1, -1, -1,   0, 1,   1, 1, 1,   0, 0, -1 },
+        { -1,  1, -1,   1, 0,   1, 1, 1,   0, 0, -1 },
+        {  1, -1, -1,   0, 1,   1, 1, 1,   0, 0, -1 },
+        { -1,  1, -1,   1, 0,   1, 1, 1,   0, 0, -1 },
+        {  1,  1, -1,   0, 0,   1, 1, 1,   0, 0, -1 },
 
         // top
-        {  1,  1,  1,   1, 1,   0, 1, 0 },
-        { -1,  1,  1,   0, 1,   0, 1, 0 },
-        {  1,  1, -1,   1, 0,   0, 1, 0 },
-        { -1,  1,  1,   0, 1,   0, 1, 0 },
-        {  1,  1, -1,   1, 0,   0, 1, 0 },
-        { -1,  1, -1,   0, 0,   0, 1, 0 },
+        {  1,  1,  1,   1, 1,   0, 1, 0,   0, 1, 0 },
+        { -1,  1,  1,   0, 1,   0, 1, 0,   0, 1, 0 },
+        {  1,  1, -1,   1, 0,   0, 1, 0,   0, 1, 0 },
+        { -1,  1,  1,   0, 1,   0, 1, 0,   0, 1, 0 },
+        {  1,  1, -1,   1, 0,   0, 1, 0,   0, 1, 0 },
+        { -1,  1, -1,   0, 0,   0, 1, 0,   0, 1, 0 },
 
         // bottom
-        { -1, -1,  1,   1, 1,   1, 0, 1 },
-        {  1, -1,  1,   0, 1,   1, 0, 1 },
-        { -1, -1, -1,   1, 0,   1, 0, 1 },
-        {  1, -1,  1,   0, 1,   1, 0, 1 },
-        { -1, -1, -1,   1, 0,   1, 0, 1 },
-        {  1, -1, -1,   0, 0,   1, 0, 1 },
+        { -1, -1,  1,   1, 1,   1, 0, 1,   0, -1, 0 },
+        {  1, -1,  1,   0, 1,   1, 0, 1,   0, -1, 0 },
+        { -1, -1, -1,   1, 0,   1, 0, 1,   0, -1, 0 },
+        {  1, -1,  1,   0, 1,   1, 0, 1,   0, -1, 0 },
+        { -1, -1, -1,   1, 0,   1, 0, 1,   0, -1, 0 },
+        {  1, -1, -1,   0, 0,   1, 0, 1,   0, -1, 0 },
     };
 
     const GLuint STRIDE = sizeof(cube[0]);
@@ -250,6 +262,14 @@ int main(int argc, const char* argv[]) {
     check_gl_err_or_die("glVertexAttribPointer");
     glEnableVertexAttribArray(2);
     check_gl_err_or_die("glEnableVertexAttribArray(2)");
+
+    offset += 3 * sizeof(GLfloat);
+
+    glVertexAttribPointer(
+        3, 3, GL_FLOAT, GL_FALSE, STRIDE, offset);
+    check_gl_err_or_die("glVertexAttribPointer");
+    glEnableVertexAttribArray(3);
+    check_gl_err_or_die("glEnableVertexAttribArray(3)");
 
 
     glViewport(0, 0, screen_width, screen_height);
