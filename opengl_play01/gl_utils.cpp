@@ -95,60 +95,47 @@ bool get_file_content(const std::string& path, std::string& content) {
     return true;
 }
 
+GLuint load_shader(const char* shader_file, GLenum shader_type) {
+
+    const char* shader_type_str = (shader_type == GL_VERTEX_SHADER) ?
+        "vert" : "frag";
+
+    std::string shader_src;
+    if (!get_file_content(shader_file, shader_src)) {
+        std::cout << "couldn't open the " << shader_type_str << " shader file: " <<
+            shader_file << std::endl;
+        exit(-1);
+    }
+
+    const char* shader_src_cstr = shader_src.c_str();
+    GLint compile_status;
+
+    GLuint shader = glCreateShader(shader_type);
+    glShaderSource(shader, 1, &shader_src_cstr, NULL);
+    if (check_gl_err()) {
+        print_shader_log(shader, shader_file);
+        exit(-1);
+    }
+    glCompileShader(shader);
+    if (check_gl_err()) {
+        print_shader_log(shader, shader_file);
+        exit(-1);
+    }
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compile_status);
+    if (compile_status == GL_FALSE) {
+        print_shader_log(shader, shader_file);
+        exit(-1);
+    }
+
+    return shader;
+}
+
 GLuint make_prog(const char* vert_shader_file, const char* frag_shader_file) {
-    std::string vert_shader_src;
-    std::string frag_shader_src;
-
-    if (!get_file_content(vert_shader_file, vert_shader_src)) {
-        std::cout << "couldn't open the vert shader file: " << vert_shader_file << std::endl;
-        return 0;
-    }
-
-    if (!get_file_content(frag_shader_file, frag_shader_src)) {
-        std::cout << "couldn't open the frag shader file: " << frag_shader_file << std::endl;
-        return 0;
-    }
 
     GLuint prog = glCreateProgram();
 
-    const char* vert_shader_src_cstr = vert_shader_src.c_str();
-    const char* frag_shader_src_cstr = frag_shader_src.c_str();
-
-    GLint compile_status;
-
-    GLuint vs = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vs, 1, &vert_shader_src_cstr, NULL);
-    if (check_gl_err()) {
-        print_shader_log(vs, vert_shader_file);
-        return 0;
-    }
-    glCompileShader(vs);
-    if (check_gl_err()) {
-        print_shader_log(vs, vert_shader_file);
-        return 0;
-    }
-    glGetShaderiv(vs, GL_COMPILE_STATUS, &compile_status);
-    if (compile_status == GL_FALSE) {
-        print_shader_log(vs, vert_shader_file);
-        return 0;
-    }
-
-    GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fs, 1, &frag_shader_src_cstr, NULL);
-    if (check_gl_err()) {
-        print_shader_log(fs, frag_shader_file);
-        return 0;
-    }
-    glCompileShader(fs);
-    if (check_gl_err()) {
-        print_shader_log(fs, frag_shader_file);
-        return 0;
-    }
-    glGetShaderiv(fs, GL_COMPILE_STATUS, &compile_status);
-    if (compile_status == GL_FALSE) {
-        print_shader_log(fs, frag_shader_file);
-        return 0;
-    }
+    GLuint vs = load_shader(vert_shader_file, GL_VERTEX_SHADER);
+    GLuint fs = load_shader(frag_shader_file, GL_FRAGMENT_SHADER);
 
     glAttachShader(prog, vs);
     if (check_gl_err()) {
